@@ -1,0 +1,62 @@
+# Esmalt importime SQLite'i mooduli
+import sqlite3
+
+# Ühendame andmebaasi või loome uue andmebaasi, kui see ei eksisteeri
+conn = sqlite3.connect('mule_food.db')
+
+# Loome kursori, mida kasutatakse andmebaasiga suhtlemiseks
+cursor = conn.cursor()
+
+# Loome tabeli toiduainete jaoks
+cursor.execute('''CREATE TABLE IF NOT EXISTS Foods 
+                (id INTEGER PRIMARY KEY, 
+                name TEXT, 
+                calories INTEGER, 
+                protein INTEGER, 
+                carbs INTEGER, 
+                fat INTEGER)''')
+
+# Lisame uue toidu andmebaasi
+def add_food(name, calories, protein, carbs, fat):
+    cursor.execute('''INSERT INTO Foods (name, calories, protein, carbs, fat) 
+                    VALUES (?, ?, ?, ?, ?)''', (name, calories, protein, carbs, fat))
+    conn.commit()
+    print(f"{name} lisatud andmebaasi!")
+
+# Võtame välja toidu andmed
+def get_food(name):
+    cursor.execute('''SELECT * FROM Foods WHERE name=?''', (name,))
+    return cursor.fetchone()
+
+# Uuendame toidu infot
+def update_food(name, calories, protein, carbs, fat):
+    cursor.execute('''UPDATE Foods SET calories=?, protein=?, carbs=?, fat=? WHERE name=?''', (calories, protein, carbs, fat, name))
+    conn.commit()
+    print(f"{name} uuendatud andmebaasis!")
+
+# Kustutame toidu andmebaasist
+def delete_food(name):
+    cursor.execute('''DELETE FROM Foods WHERE name=?''', (name,))
+    conn.commit()
+    print(f"{name} kustutatud andmebaasist!")
+
+# Näitame kogu andmebaasi sisu
+def show_all_foods():
+    cursor.execute('''SELECT * FROM Foods''')
+    all_foods = cursor.fetchall()
+    for food in all_foods:
+        print(food)
+
+# Sulgeme andmebaasi ühenduse
+def close_database_connection():
+    conn.close()
+
+# Näide funktsioonide kasutamisest
+add_food("Kanafilee", 150, 30, 0, 3)
+add_food("Munad", 70, 6, 1, 5)
+update_food("Munad", 80, 7, 2, 6)
+delete_food("Kanafilee")
+show_all_foods()
+
+# Lõpuks sulgeme andmebaasi ühenduse
+close_database_connection()
